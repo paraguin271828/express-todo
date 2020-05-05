@@ -60,13 +60,20 @@ app.put('/:id', (req, res) => {
 
     pool.query('UPDATE todolist SET done = true WHERE id = $1', [id], (err, result) => {
         if (err) return console.error('Query error: ' + err);
-        else res.send(`Todo item ${1} successfully marked as done.`);
+        else res.send(`Todo item ${id} successfully marked as done.`);
     });
 });
 
 
 // DELETE Todo item by its ID
-app.delete('/:id')
+app.delete('/:id', (req, res) => {
+    const id = req.params.id;
+
+    pool.query('DELETE FROM todolist WHERE id = $1', [id], (err, result) => {
+        if (err) return console.error('Could not delete item. ' + err);
+        else res.send(`Deleted Todo item ${id}.`);
+    });
+});
 
 app.listen(port, () => {
     console.log(`Server listening on ${port}`)
