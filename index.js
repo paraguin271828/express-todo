@@ -8,6 +8,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded( { extended: true } ));
 
+const successResult = {request: 'successful'};
+
 // GET all Todo items
 app.get('/', (req, res) => {
     pool.connect((err, client, release) => {
@@ -15,9 +17,8 @@ app.get('/', (req, res) => {
 
         client.query('SELECT * FROM todolist', (err, result) => {
             release();
-            if (err) return console.error('Query error.');
-
-            res.send(result.rows);
+            if (err) return console.error('Query error: ' + err);
+            else res.json(successResult);
         });
     });
 });
@@ -31,9 +32,8 @@ app.get('/:id', (req, res) => {
 
         client.query('SELECT * FROM todolist WHERE id = $1', [id], (err, result) => {
             release();
-            if (err) return console.error('Query error.');
-
-            res.send(result.rows);
+            if (err) return console.error('Query error:' + err);
+            else res.send(successResult);
         });
     });
 });
@@ -43,13 +43,15 @@ app.post('/', (req, res) => {
     const title = req.body.title;
     const desc = req.body.description;
 
-    // since it's only one query, use the shorthand connection this time
+    // since it's only one query, use the shorthand connection
     // to run a query on the first available idle client
+    // lines above with the connect methods are just to try out different approaches
+
     pool.query('INSERT INTO todolist (title, description, created, done) VALUES ($1, $2, current_timestamp, false)', [title, desc], (err, result) => {
       if (err) console.error('Could not create new Todo item. ' + err);
       else {
-          res.send(result);
-          console.log('Todo item created successfully');
+          res.send(successResult);
+          console.log('Todo item created successfully.');
         };
     });
 });
@@ -60,7 +62,10 @@ app.put('/:id', (req, res) => {
 
     pool.query('UPDATE todolist SET done = true WHERE id = $1', [id], (err, result) => {
         if (err) return console.error('Query error: ' + err);
-        else res.send(`Todo item ${id} successfully marked as done.`);
+        else {
+            console.log(`Todo item ${id} successfully marked as done.`);
+            res.send(successResult);
+        }
     });
 });
 
@@ -71,7 +76,10 @@ app.delete('/:id', (req, res) => {
 
     pool.query('DELETE FROM todolist WHERE id = $1', [id], (err, result) => {
         if (err) return console.error('Could not delete item. ' + err);
-        else res.send(`Deleted Todo item ${id}.`);
+        else {
+            console.log(`Deleted Todo item ${id}.`);
+            res.send(successResult);
+        }
     });
 });
 
