@@ -55,7 +55,15 @@ app.post('/', (req, res) => {
 });
 
 // UPDATE existing Todo item with new values
-app.put('/')
+app.put('/:id', (req, res) => {
+    const id = req.params.id;
+
+    pool.query('UPDATE todolist SET done = true WHERE id = $1', [id], (err, result) => {
+        if (err) return console.error('Query error: ' + err);
+        else res.send(`Todo item ${1} successfully marked as done.`);
+    });
+});
+
 
 // DELETE Todo item by its ID
 app.delete('/:id')
