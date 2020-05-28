@@ -1,1 +1,1 @@
-Node.js Todo app with Express and PostgreSQL
+Node.js boilerplate REST API for a todo app with Express and PostgreSQL
